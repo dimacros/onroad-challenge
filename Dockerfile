@@ -13,6 +13,22 @@ FROM node:${NODE_VERSION}-alpine as base
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 
+################################################################################
+# Create a new stage to run the application in development.
+FROM base as development
+
+COPY package*.json .
+
+RUN npm install
+
+# Bundle app source
+COPY . .
+
+# Expose the port that the application listens on.
+EXPOSE 3000
+
+# Run the application.
+CMD npm run start:dev
 
 ################################################################################
 # Create a stage for installing production dependecies.
