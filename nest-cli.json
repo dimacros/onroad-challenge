@@ -5,6 +5,7 @@
   "monorepo": true,
   "root": "apps/bus",
   "compilerOptions": {
+    "plugins": ["@nestjs/swagger"],
     "deleteOutDir": true,
     "webpack": true,
     "tsConfigPath": "apps/bus/tsconfig.app.json"

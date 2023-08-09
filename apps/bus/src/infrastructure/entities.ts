@@ -1,12 +1,10 @@
 import { EntitySchema } from 'typeorm';
-import { Bus } from '../domain/Bus';
-import { BusCompany } from '../domain/BusCompany';
-import { BusItinerary } from '../domain/BusItinerary';
-import { Seat, SeatType } from '../domain/Seat';
-import { City } from '../domain/City';
+import { Bus, BusCompany, BusSeat, SeatType } from '../domain/Bus.dto';
+import { BusItinerary, City, Passenger } from '../domain/BusItinerary.dto';
 
 const BusCompanyEntity = new EntitySchema<BusCompany>({
   name: 'BusCompany',
+  target: BusCompany,
   columns: {
     id: {
       type: Number,
@@ -17,45 +15,11 @@ const BusCompanyEntity = new EntitySchema<BusCompany>({
       type: String,
     },
   },
-  relations: {
-    buses: {
-      type: 'one-to-many',
-      target: 'Bus',
-      inverseSide: 'operator',
-    },
-  },
-});
-
-const SeatEntity = new EntitySchema<Seat>({
-  name: 'Seat',
-  columns: {
-    id: {
-      type: Number,
-      primary: true,
-      generated: true,
-    },
-    seatNumber: {
-      type: Number,
-    },
-    seatType: {
-      type: 'enum',
-      enum: SeatType,
-    },
-    maxRecline: {
-      type: Number,
-    },
-  },
-  relations: {
-    bus: {
-      type: 'many-to-one',
-      target: 'Bus',
-      inverseSide: 'seats',
-    },
-  },
 });
 
 const BusEntity = new EntitySchema<Bus>({
   name: 'Bus',
+  target: Bus,
   columns: {
     id: {
       type: Number,
@@ -72,19 +36,52 @@ const BusEntity = new EntitySchema<Bus>({
   relations: {
     operator: {
       type: 'many-to-one',
+      nullable: false,
       target: 'BusCompany',
       inverseSide: 'buses',
     },
     seats: {
       type: 'one-to-many',
-      target: 'Seat',
+      cascade: true,
+      target: 'BusSeat',
       inverseSide: 'bus',
+    },
+  },
+});
+
+const BusSeatEntity = new EntitySchema<BusSeat>({
+  name: 'BusSeat',
+  target: BusSeat,
+  columns: {
+    id: {
+      type: Number,
+      primary: true,
+      generated: true,
+    },
+    maxRecline: {
+      type: Number,
+    },
+    seatNumber: {
+      type: Number,
+    },
+    seatType: {
+      type: 'enum',
+      enum: SeatType,
+    },
+  },
+  relations: {
+    bus: {
+      type: 'many-to-one',
+      nullable: false,
+      target: 'Bus',
+      inverseSide: 'seats',
     },
   },
 });
 
 const CityEntity = new EntitySchema<City>({
   name: 'City',
+  target: City,
   columns: {
     id: {
       type: Number,
@@ -99,25 +96,52 @@ const CityEntity = new EntitySchema<City>({
 
 const BusItineraryEntity = new EntitySchema<BusItinerary>({
   name: 'BusItinerary',
+  target: BusItinerary,
   columns: {
     id: {
       type: Number,
       primary: true,
       generated: true,
     },
-    departureTime: {
-      type: Date,
+    availableSeats: {
+      type: Number,
+      default: 0,
     },
     arrivalTime: {
       type: Date,
     },
-    ticketPrice: {
-      type: Number,
+    departureTime: {
+      type: Date,
+    },
+    touristPrice: {
+      type: 'float',
+    },
+    executivePrice: {
+      type: 'float',
+    },
+    premiumPrice: {
+      type: 'float',
+    },
+    createdAt: {
+      type: Date,
+      createDate: true,
+    },
+    updatedAt: {
+      type: Date,
+      updateDate: true,
     },
   },
+  checks: [
+    { expression: `"availableSeats" >= 0` },
+    { expression: `"arrivalTime" > "departureTime"` },
+    { expression: `"touristPrice" > 0` },
+    { expression: `"executivePrice" > "touristPrice"` },
+    { expression: `"premiumPrice" >= "executivePrice"` },
+  ],
   relations: {
     bus: {
       type: 'many-to-one',
+      nullable: false,
       target: 'Bus',
       joinColumn: {
         name: 'busId',
@@ -126,6 +150,7 @@ const BusItineraryEntity = new EntitySchema<BusItinerary>({
     },
     originCity: {
       type: 'many-to-one',
+      nullable: false,
       target: 'City',
       joinColumn: {
         name: 'originCityId',
@@ -134,11 +159,62 @@ const BusItineraryEntity = new EntitySchema<BusItinerary>({
     },
     destinationCity: {
       type: 'many-to-one',
+      nullable: false,
       target: 'City',
       joinColumn: {
         name: 'destinationCityId',
         referencedColumnName: 'id',
       },
+    },
+    passengers: {
+      type: 'one-to-many',
+      target: 'Passenger',
+      inverseSide: 'travelRoute',
+    },
+  },
+});
+
+const PassengerEntity = new EntitySchema<Passenger>({
+  name: 'Passenger',
+  target: Passenger,
+  columns: {
+    id: {
+      type: Number,
+      primary: true,
+      generated: true,
+    },
+    firstName: {
+      type: String,
+    },
+    lastName: {
+      type: String,
+    },
+    documentNumber: {
+      type: String,
+    },
+    documentType: {
+      type: 'enum',
+      enum: ['DNI', 'PASSPORT'],
+    },
+    createdAt: {
+      type: Date,
+      createDate: true,
+    },
+    updatedAt: {
+      type: Date,
+      updateDate: true,
+    },
+  },
+  relations: {
+    seat: {
+      target: 'BusSeat',
+      type: 'many-to-one',
+      nullable: false,
+    },
+    travelRoute: {
+      target: 'BusItinerary',
+      type: 'many-to-one',
+      nullable: false,
     },
   },
 });
@@ -146,7 +222,8 @@ const BusItineraryEntity = new EntitySchema<BusItinerary>({
 export default [
   BusCompanyEntity,
   BusEntity,
-  SeatEntity,
+  BusSeatEntity,
   CityEntity,
   BusItineraryEntity,
+  PassengerEntity,
 ];

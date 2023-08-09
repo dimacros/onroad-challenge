@@ -1,15 +1,30 @@
 import { NestFactory } from '@nestjs/core';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { BusModule } from './bus.module';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { BusModule } from './bus.module';
 
 async function bootstrap() {
   const fastity = new FastifyAdapter();
-  const app = await NestFactory.create<NestFastifyApplication>(BusModule, fastity);
+  const app = await NestFactory.create<NestFastifyApplication>(
+    BusModule,
+    fastity,
+  );
+  const config = app.get(ConfigService);
+  const openApi = new DocumentBuilder()
+    .setTitle('Bus App')
+    .setVersion('1.0')
+    .build();
+
+  SwaggerModule.setup('/', app, SwaggerModule.createDocument(app, openApi));
+
+  app.useGlobalPipes(new ValidationPipe(config.get('validation')));
 
   await app.listen(
-    app.get(ConfigService).get<number>('port'), 
-    app.get(ConfigService).get<string>('host', '0.0.0.0'),
+    config.get<number>('port'),
+    config.get<string>('host', '0.0.0.0'),
   );
 }
+
 bootstrap();

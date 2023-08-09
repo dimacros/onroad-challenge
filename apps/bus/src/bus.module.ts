@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BusController } from './bus.controller';
-import { BusService } from './bus.service';
+import { BusService } from './application/bus.service';
+import { BusItineraryService } from './application/bus_itinerary';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from 'config/busConfiguration';
@@ -23,6 +24,6 @@ import type { DataSourceOptions } from 'typeorm';
     TypeOrmModule.forFeature(entities),
   ],
   controllers: [BusController],
-  providers: [BusService],
+  providers: [BusService, BusItineraryService],
 })
 export class BusModule {}
