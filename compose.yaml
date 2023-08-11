@@ -8,18 +8,18 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  server:
-    build:
-      context: .
-      target: development
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file: .env
-    volumes:
-      - ./apps:/usr/src/app/apps
-    ports:
-      - 3000:3000
+  #server:
+  #  build:
+  #    context: .
+  #    target: development
+  #  depends_on:
+  #    db:
+  #      condition: service_healthy
+  #  env_file: .env
+  #  volumes:
+  #    - ./apps:/usr/src/app/apps
+  #  ports:
+  #    - 3000:3000
   db:
     image: postgres:15-alpine
     user: postgres
@@ -34,6 +34,33 @@ services:
       - 5432:5432
     healthcheck:
       test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0
+    command:
+      - "start-dev"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://db:5432/onroad_db
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=onRoadch4ll3ng3
+    ports:
+      - 8080:8080
+  redis:
+    image: redis:7.2-rc3-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5

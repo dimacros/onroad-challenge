@@ -5,7 +5,9 @@
   "monorepo": true,
   "root": "apps/bus",
   "compilerOptions": {
-    "plugins": ["@nestjs/swagger"],
+    "plugins": [
+      "@nestjs/swagger"
+    ],
     "deleteOutDir": true,
     "webpack": true,
     "tsConfigPath": "apps/bus/tsconfig.app.json"
@@ -18,6 +20,33 @@
       "sourceRoot": "apps/bus/src",
       "compilerOptions": {
         "tsConfigPath": "apps/bus/tsconfig.app.json"
+      }
+    },
+    "order": {
+      "type": "application",
+      "root": "apps/order",
+      "entryFile": "main",
+      "sourceRoot": "apps/order/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/order/tsconfig.app.json"
+      }
+    },
+    "chat": {
+      "type": "application",
+      "root": "apps/chat",
+      "entryFile": "main",
+      "sourceRoot": "apps/chat/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/chat/tsconfig.app.json"
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
       }
     }
   }

@@ -84,6 +84,10 @@ export class BusItineraryService {
     return this.busItineraryRepository.save(busItinerary);
   }
 
+  findById(id: number): Promise<BusItinerary> {
+    return this.busItineraryRepository.findOneBy({ id });
+  }
+
   findAll(params: BusItineraryQuery): Promise<BusItineraryResponse[]> {
     const { available, originCityId, destinationCityId } = params;
     const qb = this.busItineraryRepository.createQueryBuilder('bus_itinerary');

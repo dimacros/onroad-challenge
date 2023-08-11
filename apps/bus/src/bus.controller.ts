@@ -2,14 +2,18 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
+  ParseArrayPipe,
   ParseIntPipe,
   Post,
   Query,
 } from '@nestjs/common';
 import { BusService } from './application/bus.service';
 import { BusItineraryService } from './application/bus_itinerary';
+import { BusReservationService } from './application/bus_reservation';
 import {
+  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
@@ -18,12 +22,14 @@ import {
 import {
   BusItineraryQuery,
   CreateBusItineraryDto,
+  CreateReservationDto,
 } from './domain/HttpRequest.dto';
 import {
   BusDetailResponse,
   BusItineraryDetailResponse,
   BusItineraryResponse,
   BusResponse,
+  SeatReservationResponse,
 } from './domain/HttpResponse.dto';
 
 @ApiTags('Bus')
@@ -32,6 +38,7 @@ export class BusController {
   constructor(
     private readonly busService: BusService,
     private readonly busItineraryService: BusItineraryService,
+    private readonly busReservationService: BusReservationService,
   ) {}
 
   @Get('buses')
@@ -61,7 +68,31 @@ export class BusController {
 
   @Get('bus-itineraries/:id')
   @ApiOkResponse({ type: BusItineraryDetailResponse })
-  getBusItinerary(@Param('id', ParseIntPipe) id: number) {
-    return this.busItineraryService.findOne(id);
+  async getBusItinerary(@Param('id', ParseIntPipe) id: number) {
+    const itinerary = await this.busItineraryService.findOne(id);
+
+    if (! itinerary) {
+      throw new NotFoundException('Bus itinerary not found');
+    }
+
+    return itinerary;
+  }
+
+  @Post('bus-itineraries/:id/reserve-seats')
+  @ApiCreatedResponse({ type: [SeatReservationResponse] })
+  @ApiUnprocessableEntityResponse({ description: 'Unprocessable Entity' })
+  @ApiBody({ type: [CreateReservationDto] })
+  async reserveSeats(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ParseArrayPipe({ items: CreateReservationDto }))
+    createReservationDtos: CreateReservationDto[],
+  ) {
+    const itinerary = await this.busItineraryService.findById(id);
+
+    if (! itinerary) {
+      throw new NotFoundException('Bus itinerary not found');
+    }
+
+    return this.busReservationService.createMany(itinerary, createReservationDtos);
   }
 }

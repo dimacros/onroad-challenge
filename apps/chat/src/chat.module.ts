@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
-import { BusController } from './bus.controller';
-import { BusService } from './application/bus.service';
-import { BusItineraryService } from './application/bus_itinerary';
-import { BusReservationService } from './application/bus_reservation';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import configuration from 'config/busConfiguration';
-import entities from './infrastructure/entities';
+import { SharedModule } from '@app/shared';
+import { ChatController } from './chat.controller';
+import { ChatGateway } from './application/chat.gateway';
+import { ChatService } from './application/chat.service';
+import { StaffService } from './application/staff.service';
+import configuration from 'config/chatConfiguration';
+import entities from './infraestructura/entities';
 import type { DataSourceOptions } from 'typeorm';
 
 @Module({
   imports: [
+    SharedModule,
     ConfigModule.forRoot({
       ignoreEnvFile: process.env.NODE_ENV === 'production',
       load: [configuration],
@@ -24,7 +26,7 @@ import type { DataSourceOptions } from 'typeorm';
     }),
     TypeOrmModule.forFeature(entities),
   ],
-  controllers: [BusController],
-  providers: [BusService, BusItineraryService, BusReservationService],
+  controllers: [ChatController],
+  providers: [ChatGateway, ChatService, StaffService],
 })
-export class BusModule {}
+export class ChatModule {}

@@ -1,20 +1,27 @@
-import entities from 'apps/bus/src/infrastructure/entities';
 import type { DataSourceOptions } from 'typeorm';
+import type { KeycloakConnectConfig } from 'nest-keycloak-connect';
 import type { ValidationPipeOptions } from '@nestjs/common';
+import entities from 'apps/chat/src/infraestructura/entities';
 
 const busConfiguration: () => {
   host: string;
   port: number;
+  keycloak: KeycloakConnectConfig;
   typeorm: DataSourceOptions;
   validation: ValidationPipeOptions;
 } = () => ({
-  host: process.env.BUS_APP_HOST,
-  port: parseInt(process.env.BUS_APP_PORT, 10) || 3000,
-  redisUrl: process.env.REDIS_URL,
+  host: process.env.CHAT_APP_HOST,
+  port: parseInt(process.env.CHAT_APP_PORT || '3001', 10),
+  keycloak: {
+    serverUrl: process.env.KEYCLOAK_SERVER_URL,
+    realm: process.env.KEYCLOAK_REALM,
+    clientId: process.env.KEYCLOAK_CLIENT_ID,
+    secret: process.env.KEYCLOAK_CLIENT_SECRET,
+  },
   typeorm: {
     type: 'postgres',
-    url: process.env.BUS_DATABASE_URL,
-    schema: 'bus_app',
+    url: process.env.CHAT_DATABASE_URL,
+    schema: 'chat_app',
     synchronize: process.env.NODE_ENV !== 'production',
     logging: process.env.NODE_ENV !== 'production',
     entities: entities,

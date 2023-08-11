@@ -1,4 +1,4 @@
-# Challenge
+## Challenge (Spanish)
 
 Se pide crear un sistema de buses que maneje una serie de itinerarios de lima hacia todas las demás provincias.
 Considerar los siguientes criterios:
@@ -22,52 +22,60 @@ Considerar los siguientes criterios:
     - Usuario pasajero: Usuario tipo cliente que abordará los buses.
 10. Se pide una mensajería de chat en tiempo real entre usuarios tipo onroad para poder realizar coordinaciones internas.
 
-## Description
+## Requirements
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js v.18
+- Docker
 
-## Installation
+## Setup & Installation
+
+Clone the repository and install the dependencies.
 
 ```bash
 $ npm install
 ```
 
+Then copy the file `.env.copy` to `.env` and finally run the docker dependencies.
+
+```bash
+$ docker-compose up -d
+```
+
+#### Important Steps
+Since it is a microservices architecture with two applications. We must create a database or schema for each application. So go to the sql editor and run the following:
+
+```sql
+CREATE SCHEMA IF NOT EXISTS bus_app;
+CREATE SCHEMA IF NOT EXISTS chat_app;
+```
+
+Now you can populate your database
+
+```bash
+$ npm run db:seed:bus
+```
+
+It is also important to configure the authentication server to make the chat work.
+
+You can follow the steps directly in the official keycloak documentation: https://www.keycloak.org/getting-started/getting-started-docker
+
+The chat application is located at http://localhost:3001/sample-chat
+<!-- Chat sample -->
+![Chat Sample](./docs/chat-sample.gif)
+
 ## Running the app
+There are two applications to run, so you have to start each one individually.
 
 ```bash
 # development
-$ npm run start
+$ npm run start bus|chat
 
 # watch mode
-$ npm run start:dev
+$ npm run start:dev bus|chat
 
 # production mode
-$ npm run start:prod
+$ npm run start:prod bus|chat
 ```
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+## Enjoy
+That's all

@@ -1,4 +1,3 @@
-import 'tsconfig-paths/register';
 import { faker } from '@faker-js/faker';
 import { NestFactory } from '@nestjs/core';
 import { BusModule } from 'apps/bus/src/bus.module';

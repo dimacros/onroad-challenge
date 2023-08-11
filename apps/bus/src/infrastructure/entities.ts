@@ -1,6 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Bus, BusCompany, BusSeat, SeatType } from '../domain/Bus.dto';
 import { BusItinerary, City, Passenger } from '../domain/BusItinerary.dto';
+import { BusSeatReservation } from '../domain/BusSeatReservation';
 
 const BusCompanyEntity = new EntitySchema<BusCompany>({
   name: 'BusCompany',
@@ -219,6 +220,50 @@ const PassengerEntity = new EntitySchema<Passenger>({
   },
 });
 
+const BusSeatReservationEntity = new EntitySchema<BusSeatReservation>({
+  name: 'BusSeatReservation',
+  target: BusSeatReservation,
+  columns: {
+    id: {
+      type: Number,
+      primary: true,
+      generated: true,
+    },
+    passengerDocumentNumber: {
+      type: String,
+    },
+    passengerDocumentType: {
+      type: 'enum',
+      enum: ['DNI', 'PASSPORT'],
+    },
+    passengerFirstName: {
+      type: String,
+    },
+    passengerLastName: {
+      type: String,
+    },
+    releasedAt: {
+      type: Date,
+      default: null,
+    },
+    reservedAt: {
+      type: Date,
+    }
+  },
+  relations: {
+    reservedSeat: {
+      target: 'BusSeat',
+      type: 'many-to-one',
+      nullable: false,
+    },
+    travelRoute: {
+      target: 'BusItinerary',
+      type: 'many-to-one',
+      nullable: false,
+    },
+  }
+});
+
 export default [
   BusCompanyEntity,
   BusEntity,
@@ -226,4 +271,5 @@ export default [
   CityEntity,
   BusItineraryEntity,
   PassengerEntity,
+  BusSeatReservationEntity,
 ];

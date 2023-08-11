@@ -10,11 +10,10 @@ const busConfiguration: () => {
 } = () => ({
   host: process.env.BUS_APP_HOST,
   port: parseInt(process.env.BUS_APP_PORT, 10) || 3000,
-  redisUrl: process.env.REDIS_URL,
   typeorm: {
     type: 'postgres',
     url: process.env.BUS_DATABASE_URL,
-    schema: 'bus_app',
+    schema: 'order_app',
     synchronize: process.env.NODE_ENV !== 'production',
     logging: process.env.NODE_ENV !== 'production',
     entities: entities,

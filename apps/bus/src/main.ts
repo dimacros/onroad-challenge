@@ -3,7 +3,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { BusReservationService } from './application/bus_reservation';
 import { BusModule } from './bus.module';
+import * as Queue from 'bull';
 
 async function bootstrap() {
   const fastity = new FastifyAdapter();
@@ -25,6 +27,13 @@ async function bootstrap() {
     config.get<number>('port'),
     config.get<string>('host', '0.0.0.0'),
   );
+
+  const queue = new Queue('seat booking', config.get<string>('redisUrl'));
+
+  await Promise.all([
+    queue.add(null, { repeat: { cron: '*/10 * * * *' } }),
+    queue.process(_ => app.get(BusReservationService).checkForExpiredReservations()),
+  ]);
 }
 
 bootstrap();
